@@ -53,13 +53,6 @@ novel-agent/
 ├── models/                       # 嵌入模型缓存（首次运行自动下载）
 ├── user_data/                    # 用户数据（自动创建）
 ├── sample/                       # 格式示例参考
-└── tests/                        # 测试
-```
-
-## 运行测试
-
-```bash
-python -m pytest tests/ -v
 ```
 
 ## 功能
