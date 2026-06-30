@@ -1,0 +1,13 @@
+.venv/
+venv/
+user_data/
+models/
+data/
+__pycache__/
+*.pyc
+.pytest_cache/
+.worktrees/
+.cursor/
+.env
+.DS_Store
+debug_test.py

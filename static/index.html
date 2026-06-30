@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小说续写助手</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=15">
+</head>
+<body>
+  <div id="app">
+    <!-- 侧边栏 -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <h2>小说列表</h2>
+        <button id="btn-new-novel" title="新建小说">＋</button>
+      </div>
+      <ul id="novel-list"></ul>
+      <div class="sidebar-footer">
+        <button id="btn-free-chat" class="btn-free-chat">自由聊天</button>
+        <button id="btn-upload" title="上传小说（支持 JSON 和 TXT）">上传小说</button>
+        <input type="file" id="file-input" accept=".json,.txt" hidden>
+      </div>
+    </aside>
+
+    <!-- 主区域 -->
+    <main id="main">
+      <div id="welcome" class="center-message">
+        <h1>小说续写助手</h1>
+        <p>从左侧选择或新建一部小说开始</p>
+        <p style="margin-top:12px;font-size:13px;opacity:0.5;">或点击「自由聊天」直接测试模型</p>
+      </div>
+
+      <div id="workspace" class="hidden">
+        <header id="topbar">
+          <h3 id="novel-title"></h3>
+          <div id="mode-toggle">
+            <button class="mode-btn active" data-mode="write">续写</button>
+            <button class="mode-btn" data-mode="ask">提问</button>
+          </div>
+          <div class="topbar-actions">
+            <button id="btn-memory" title="查看/更新记忆">记忆</button>
+            <button id="btn-chapters" title="查看章节">章节</button>
+          </div>
+        </header>
+
+        <div id="chat-area">
+          <div id="messages-write" class="messages-container"></div>
+          <div id="messages-ask" class="messages-container hidden"></div>
+        </div>
+
+        <div id="input-area">
+          <textarea id="user-input" placeholder="输入续写指令或问题..." rows="3"></textarea>
+          <div class="input-actions">
+            <button id="btn-send">发送</button>
+            <button id="btn-delete-last" title="删除最近一章">撤回最近一章</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自由聊天 -->
+      <div id="free-chat" class="hidden">
+        <header id="topbar-free" class="topbar">
+          <h3>自由聊天</h3>
+          <span style="color:var(--text-secondary);font-size:13px;">不关联小说，不存储，直接测试模型能力</span>
+        </header>
+        <div id="free-chat-area" class="chat-area-inner" style="flex:1;overflow-y:auto;padding:20px;">
+          <div id="free-messages" style="max-width:800px;margin:0 auto;"></div>
+        </div>
+        <div id="input-area">
+          <textarea id="free-input" placeholder="随便聊点什么..." rows="3"></textarea>
+          <div class="input-actions">
+            <button id="btn-free-send">发送</button>
+            <button id="btn-free-clear" class="btn-clear">清除对话</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 记忆面板 -->
+      <div id="memory-panel" class="panel hidden">
+        <div class="panel-header">
+          <h3>记忆管理</h3>
+          <button class="panel-close">&times;</button>
+        </div>
+        <div class="panel-body">
+          <div class="memory-section">
+            <h4>世界观设定</h4>
+            <div id="memory-worldview" class="memory-content"></div>
+          </div>
+          <div class="memory-section">
+            <h4>核心事件时间线</h4>
+            <div id="memory-timeline" class="memory-content"></div>
+          </div>
+          <div class="memory-section">
+            <h4>近章摘要</h4>
+            <div id="memory-summary" class="memory-content"></div>
+          </div>
+          <div class="memory-section">
+            <h4>人物档案</h4>
+            <div id="memory-entity-profiles" class="memory-content" style="white-space: pre-wrap;"></div>
+          </div>
+          <div class="memory-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h4 style="margin-bottom: 0;">文风规范</h4>
+              <div>
+                <button id="btn-edit-style" class="chapter-copy-btn" style="margin-left: 8px;">编辑</button>
+                <button id="btn-save-style" class="chapter-copy-btn hidden" style="margin-left: 8px; color: var(--accent); border-color: var(--accent);">保存</button>
+                <button id="btn-generate-style" class="chapter-copy-btn" style="margin-left: 8px;" title="根据已有记忆自动提取文风规范">自动生成</button>
+              </div>
+            </div>
+            <div id="memory-style-guidelines" class="memory-content" style="white-space: pre-wrap;"></div>
+            <textarea id="memory-style-input" class="memory-content hidden" rows="5" style="width: 100%; resize: vertical; box-sizing: border-box; background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 12px;"></textarea>
+          </div>
+          <div class="memory-actions">
+            <button id="btn-update-memory" class="btn-primary">手动更新记忆</button>
+            <button id="btn-stop-memory" class="btn-danger hidden">停止更新</button>
+          </div>
+          <div id="memory-progress" class="hidden"></div>
+        </div>
+      </div>
+
+      <!-- 章节面板 -->
+      <div id="chapters-panel" class="panel hidden">
+        <div class="panel-header">
+          <h3>章节列表</h3>
+          <button class="panel-close">&times;</button>
+        </div>
+        <div class="panel-body">
+          <div id="chapters-list"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 新建小说弹窗 -->
+  <div id="modal-overlay" class="hidden">
+    <div class="modal">
+      <h3>新建小说</h3>
+      <input id="novel-name-input" type="text" placeholder="请输入小说名称">
+      <div class="modal-actions">
+        <button id="modal-cancel">取消</button>
+        <button id="modal-confirm" class="btn-primary">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js?v=22"></script>
+</body>
+</html>
